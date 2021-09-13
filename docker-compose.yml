@@ -6,8 +6,8 @@ services:
       context: ./node
       dockerfile: Dockerfile.source
       args:
-        - BUILD_TARGET=master
-    stop_grace_period: 3m
+        - BUILD_TARGET=${NODE_BUILD_TARGET}
+    stop_grace_period: 1m
     image: provide-node:local
     volumes: 
       - provide-data:/home/provide
@@ -32,8 +32,7 @@ services:
       context: ./cli
       dockerfile: Dockerfile.source
       args:
-        - BUILD_TARGET=dev
-    stop_grace_period: 3m
+        - BUILD_TARGET=${CLI_BUILD_TARGET}
     image: provide-cli:local
     volumes: 
       - provide-data:/home/provide
