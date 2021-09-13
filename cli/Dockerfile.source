@@ -1,0 +1,34 @@
+# Build Provide CLI in a stock Go build container
+FROM golang:1.16-alpine as builder
+
+ARG BUILD_TARGET
+
+RUN apk update && apk add --no-cache make gcc musl-dev linux-headers git bash
+
+WORKDIR /src
+RUN bash -c "git clone https://github.com/provideplatform/provide-cli.git && cd provide-cli && git config advice.detachedHead false && git fetch --all --tags && git checkout ${BUILD_TARGET} && make mod && make install"
+
+#Pull all binaries into a second stage deploy container
+FROM alpine:latest
+
+ARG USER=provide
+ARG UID=10000
+
+RUN apk add --no-cache ca-certificates bash tzdata
+
+# See https://stackoverflow.com/a/55757473/12429735RUN
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --shell "bash" \
+    --uid "${UID}" \
+    "${USER}"
+
+
+# Copy executable
+COPY --from=builder /go/bin/prvd /usr/local/bin/
+
+USER ${USER}
+WORKDIR /home/provide
+
+ENTRYPOINT ["bash"]

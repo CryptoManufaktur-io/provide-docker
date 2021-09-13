@@ -1,0 +1,42 @@
+version: "3.4"
+services:
+  node:
+    restart: unless-stopped
+    build:
+      context: ./node
+      dockerfile: Dockerfile.source
+      args:
+        - BUILD_TARGET=master
+    stop_grace_period: 3m
+    image: provide-node:local
+    volumes: 
+      - provide-data:/home/provide
+    ports:
+      - 33333:33333/tcp
+      - 33333:33333/udp
+    environment:
+      - VAULT_ID=${VAULT_ID}
+      - VAULT_KEY_ID=${VAULT_KEY_ID}
+      - VAULT_REFRESH_TOKEN=${REFRESH_TOKEN}
+      - PROVIDE_REFRESH_TOKEN=${REFRESH_TOKEN}
+      - BASELEDGER_MODE=full
+      - BASELEDGER_LOG_LEVEL='main:debug,abci-client:debug,blockchain:debug,consensus:debug,state:debug,statesync:debug,*:error'
+      - BASELEDGER_GENESIS_URL=http://genesis.peachtree.baseledger.provide.network:1337/genesis
+      - BASELEDGER_PERSISTENT_PEERS=187b285fcf8bff3f08f5e61cfe05b713a4d32356@genesis.peachtree.baseledger.provide.network:33333
+      - BASELEDGER_PEER_ALIAS=cmf
+      - NATS_URL=nats://35.174.77.159:4222,nats://35.172.123.165:4222
+      - NATS_CLIENT_PREFIX=baseledger
+  cli:
+    restart: "no"
+    build:
+      context: ./cli
+      dockerfile: Dockerfile.source
+      args:
+        - BUILD_TARGET=dev
+    stop_grace_period: 3m
+    image: provide-cli:local
+    volumes: 
+      - provide-data:/home/provide
+
+volumes:
+  provide-data:
