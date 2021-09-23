@@ -18,12 +18,11 @@ RUN apk add --no-cache ca-certificates bash tzdata
 
 # See https://stackoverflow.com/a/55757473/12429735RUN
 RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --shell "bash" \
-    --uid "${UID}" \
+    -D \
+    -g "" \
+    -s "bash" \
+    -u "${UID}" \
     "${USER}"
-
 
 # Copy executable
 COPY --from=builder /go/bin/prvd /usr/local/bin/
